@@ -1,6 +1,6 @@
 """API version 1.0 models."""
 from datetime import datetime
-from v1 import db
+from api import db
 
 
 class User(db.Model):
@@ -18,6 +18,7 @@ class User(db.Model):
 
 
 class BucketList(db.Model):
+    __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text)
@@ -34,6 +35,7 @@ class BucketList(db.Model):
 
 
 class BucketItem(db.Model):
+    __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text)
@@ -42,7 +44,7 @@ class BucketItem(db.Model):
     accomplished_date = db.Column(db.DateTime)
     closed_date = db.Column(db.DateTime)
     open_duration = db.Column(db.Integer)
-    bucket_id = db.Column(db.Integer, db.ForeignKey('bucket.id'),
+    bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'),
                           nullable=False)
 
     def __repr__(self):

@@ -1,51 +1,58 @@
-"""API version 1.0 models."""
+"""API version 1.0 models.
+
+api/models.py
+"""
 from datetime import datetime
 from api import db
 
 
-class User(db.Model):
+class AddUpdateDelete():
+    def add(self, resource):
+        db.session.add(resource)
+        return db.session.commit()
+    
+    def update(self):
+        return db.session.commit()
+    
+    def delete(self, resource):
+        db.session.delete(resource)
+        return db.session.commit()
+
+class User(db.Model, AddUpdateDelete):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    is_admin = db.Column(db.Boolean, default=True)
-    created_date = db.Column(db.DateTime, nullable=False,
-                             default=datetime.utcnow)
+    created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
         return '<User %r>' % self.username
 
 
-class BucketList(db.Model):
+class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text)
-    status = db.Column(db.String(30), default='created')
-    created_date = db.Column(db.DateTime, nullable=False,
-                             default=datetime.utcnow)
-    accomplished_date = db.Column(db.DateTime)
-    closed_date = db.Column(db.DateTime)
-    open_duration = db.Column(db.Integer)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_modified = db.Column(db.DateTime)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
+    created_by = db.Column(db.String(100))
 
     def __repr__(self):
         return '<BucketList %r>' % self.name
 
 
-class BucketItem(db.Model):
+class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.Text)
-    created_date = db.Column(db.DateTime, nullable=False,
-                             default=datetime.utcnow)
-    accomplished_date = db.Column(db.DateTime)
-    closed_date = db.Column(db.DateTime)
-    open_duration = db.Column(db.Integer)
-    bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'),
-                          nullable=False)
+    done = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_closed = db.Column(db.DateTime)
+    date_modified = db.Column(db.DateTime)
+    bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)
 
     def __repr__(self):
         return '<BucketItem %r>' % self.name

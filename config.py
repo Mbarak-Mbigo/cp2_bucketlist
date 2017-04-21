@@ -10,41 +10,48 @@ import os
 # local imports
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+PAGINATION_PAGE_SIZE = 5
+PAGINATION_PAGE_ARGUMENT_NAME = 'page'
 
 class Config:
     """Common configurations across all environments."""
-
-    SECRET_KEY = 'id9v<3%$i01p9BE@'
+    DEBUG = False
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'id9v<3%$i01p9BE@'
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-
-    @staticmethod
-    def init_app(app):
-        pass
 
 
 class DevelopmentConfig(Config):
     """Development environment configurations."""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = "postgresql://{DB_USER}: {DB_PASS}@{DB_ADDR}/{DB_NAME}".format(DB_USER="db_admin",
+                                                                                             DB_PASS="",
+                                                                                             DB_ADDR="127.0.0.1",
+                                                                                             DB_NAME="bucketlist_dev")
 
 
 class TestingConfig(Config):
     """Testing environment configurations."""
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL')
+    WTF_CSRF_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = "postgresql://{DB_USER}: {DB_PASS}@{DB_ADDR}/{DB_NAME}".format(DB_USER="db_admin",
+                                                                                             DB_PASS="",
+                                                                                             DB_ADDR="0.0.0.0",
+                                                                                             DB_NAME="bucketlist_test")
 
 
 class ProductionConfig(Config):
     """Production environment configurations."""
 
     SQLALCHEMY_ECHO = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = "postgresql://{DB_USER}: {DB_PASS}@{DB_ADDR}/{DB_NAME}".format(DB_USER="db_user01",
+                                                                                             DB_PASS="64fks6wH&",
+                                                                                             DB_ADDR="0.0.0.0",
+                                                                                             DB_NAME="bucketlist_data")
 
 
 config = {

@@ -24,6 +24,7 @@ class User(db.Model, AddUpdateDelete):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String)
     email = db.Column(db.String(150), unique=True, nullable=False)
+    bucketlists = db.relationship('BucketList', backref='user', lazy=True)
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
@@ -38,7 +39,7 @@ class BucketList(db.Model, AddUpdateDelete):
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
-    created_by = db.Column(db.String(100))
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return '<BucketList %r>' % self.name

@@ -1,13 +1,10 @@
 from flask_restful import Resource
 
 
-class Bucketlist(Resource):
-    def get(self):
+class BucketList(Resource):
+    def get(self, id=None):
         # return all bucketlists with their items for the user
-        pass
-    
-    def get(self, id):
-        # return bucketlist with its items for the user
+        # return a specific bucketlist with its items for the user
         pass
     
     def post(self):

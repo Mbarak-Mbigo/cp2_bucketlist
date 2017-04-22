@@ -3,7 +3,13 @@
 api/models.py
 """
 from datetime import datetime
+from marshmallow import Schema, fields, pre_load
+from marshmallow import validate
+from flask_marshmallow import Marshmallow
+
 from api import db
+
+ma = Marshmallow()
 
 
 class AddUpdateDelete():
@@ -35,7 +41,7 @@ class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.String(250))
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
@@ -57,3 +63,35 @@ class BucketItem(db.Model, AddUpdateDelete):
 
     def __repr__(self):
         return '<BucketItem %r>' % self.name
+    
+    
+# Schemas do validate, serialize and deserialize models
+# consider adding urls
+class UserSchema(ma.Schema):
+    id = fields.Integer(dump_only=True)
+    username = fields.String(required=True, validate=validate.Length(8))
+    password = fields.String()
+    email = fields.String()
+    created_date = fields.DateTime()
+    bucketlists = fields.Nested('BucketListSchema', many=True, exclude=('user'))
+    
+ 
+class BucketListSchema(ma.Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.String(required=True)
+    description = fields.String()
+    date_created = fields.DateTime()
+    date_modified = fields.DateTime()
+    user = fields.Nested('UserSchema', only=['id', 'username'])
+    items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
+    
+    
+class BucketItemSchema(ma.Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.String(required=True)
+    done = fields.Boolean(default=False)
+    date_created = fields.DateTime()
+    date_closed = fields.DateTime()
+    date_modified = fields.DateTime()
+    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'],
+                               required=True)

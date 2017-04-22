@@ -6,6 +6,7 @@ from datetime import datetime
 from marshmallow import Schema, fields, pre_load
 from marshmallow import validate
 from flask_marshmallow import Marshmallow
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from api import db
 
@@ -28,13 +29,26 @@ class User(db.Model, AddUpdateDelete):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String)
+    password_hash = db.Column(db.String, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     bucketlists = db.relationship('BucketList', backref='user', lazy=True)
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return '<User %r>' % self.username
+    
+    
 
 
 class BucketList(db.Model, AddUpdateDelete):
@@ -70,7 +84,7 @@ class BucketItem(db.Model, AddUpdateDelete):
 class UserSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
     username = fields.String(required=True, validate=validate.Length(8))
-    password = fields.String()
+    password_hash = fields.String()
     email = fields.String()
     created_date = fields.DateTime()
     bucketlists = fields.Nested('BucketListSchema', many=True, exclude=('user'))

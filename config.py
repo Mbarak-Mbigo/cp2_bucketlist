@@ -10,8 +10,7 @@ import os
 # local imports
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-PAGINATION_PAGE_SIZE = 5
-PAGINATION_PAGE_ARGUMENT_NAME = 'page'
+
 
 class Config:
     """Common configurations across all environments."""
@@ -21,6 +20,8 @@ class Config:
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    PAGINATION_PAGE_SIZE = 20
+    PAGINATION_PAGE_ARGUMENT_NAME = 'page'
 
 
 class DevelopmentConfig(Config):

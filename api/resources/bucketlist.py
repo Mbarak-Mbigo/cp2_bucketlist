@@ -1,6 +1,7 @@
 from flask_restful import Resource
 
 
+
 class BucketList(Resource):
     def get(self, id=None):
         # return all bucketlists with their items for the user

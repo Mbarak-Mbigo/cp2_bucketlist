@@ -2,7 +2,8 @@
 
 api/models.py
 """
-from datetime import datetime
+import jwt
+import datetime
 from marshmallow import Schema, fields, pre_load
 from marshmallow import validate
 from flask_marshmallow import Marshmallow
@@ -35,7 +36,7 @@ class User(db.Model, AddUpdateDelete):
     password_hash = db.Column(db.String, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     bucketlists = db.relationship('BucketList', backref='user', lazy=True)
-    created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     
     @property
     def password(self):
@@ -51,21 +52,39 @@ class User(db.Model, AddUpdateDelete):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_auth_token(self, expiration=1800):
-        serializer = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
-        return serializer.dumps({'id': self.id})
+    def encode_auth_token(self, user_id):
+        """
+        :param user_id:
+        :return: string
+        """
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=600),
+                'iat': datetime.datetime.utcnow(),
+                'sub': user_id
+            }
+            return jwt.encode(
+                payload,
+                current_app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return e
     
     @staticmethod
-    def verify_auth_token(token):
-        serializer = Serializer(current_app.config['SECRET_KEY'])
+    def decode_auth_token(auth_token):
+        """"
+        Decodes the auth token
+        :param auth_token:
+        :return: integer|string
+        """
         try:
-            data = serializer.loads(token)
-        except SignatureExpired:
-            return None  # valid token, but expired
-        except BadSignature:
-            return None  # invalid token
-        user = User.query.get(data['id'])
-        return user
+            payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return 'Signature expired.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token.'
     
     
 
@@ -75,7 +94,7 @@ class BucketList(db.Model, AddUpdateDelete):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(250))
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     date_modified = db.Column(db.DateTime)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -89,7 +108,7 @@ class BucketItem(db.Model, AddUpdateDelete):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     done = db.Column(db.Boolean, default=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     date_closed = db.Column(db.DateTime)
     date_modified = db.Column(db.DateTime)
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)

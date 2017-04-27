@@ -77,7 +77,10 @@ class TestUserRegistration(BaseTestCase):
             headers=self.get_accept_content_type_headers(),
             data=json.dumps(user_correct_credentials)
         )
+        response_data = json.loads(register_response.data.decode())
         self.assertEqual(register_response.status_code, 201)
+        # check token available
+        self.assertTrue(response_data['auth_token'])
         
     def test_register_existing_user(self):
         register_response = self.test_client.post(
@@ -100,7 +103,9 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
+        login_data = json.loads(login_response.data.decode())
         self.assertEqual(login_response.status_code, 200)
+        self.assertTrue(login_data['auth_token'])
         
     def test_login_user_with_no_username(self):
         login_response = self.test_client.post(

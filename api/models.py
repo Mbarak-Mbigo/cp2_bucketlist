@@ -85,7 +85,7 @@ class User(db.Model, AddUpdateDelete):
             payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
             return payload['sub']
         except jwt.ExpiredSignatureError:
-            return 'Signature expired.'
+            return 'Session has expired. Login to get a new token'
         except jwt.InvalidTokenError:
             return 'Invalid token.'
     
@@ -143,6 +143,7 @@ class BucketListSchema(ma.Schema):
 class BucketItemSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
     name = fields.String(required=True)
+    description = fields.String()
     done = fields.Boolean(default=False)
     date_created = fields.DateTime()
     date_closed = fields.DateTime()

@@ -20,4 +20,3 @@ class Authentication(Resource):
     
 api.add_resource(Authentication, '/login', endpoint='auth')
 api.add_resource(Authentication, '/register', endpoint='auth_register')
-api.add_resource(Authentication, '/token', endpoint='auth_token')

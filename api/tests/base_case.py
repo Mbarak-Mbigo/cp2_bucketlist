@@ -33,15 +33,22 @@ class BaseTestCase(unittest.TestCase):
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
+  
     
-    def register_user(self, username, password, email):
-        response = self.test_client.post(
-            '/auth/register',
+class BucketBaseCase(BaseTestCase):
+    def login_default_user(self):
+        login_response = self.test_client.post(
+            '/auth/login',
             headers=self.get_accept_content_type_headers(),
             data=json.dumps({
-                'username': username,
-                'password': password,
-                'email': email
+                'username': self.test_username,
+                'password': self.test_password
             })
         )
-        return response
+        login_resp_data = json.loads(login_response.data.decode())
+        return login_resp_data
+    
+    def get_authentication_content_type_headers(self):
+        authentication_headers = self.get_accept_content_type_headers()
+        authentication_headers['Authorization'] = self.login_default_user()['auth_token']
+        return authentication_headers

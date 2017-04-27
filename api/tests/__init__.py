@@ -1,3 +1,4 @@
+# api/tests/__init__.py
 """"UNIT TEST STORIES
     
     Test appropriate configurations applied

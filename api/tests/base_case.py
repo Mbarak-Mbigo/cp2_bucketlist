@@ -1,8 +1,8 @@
+# api/tests/base_case.py
 import unittest
-from base64 import b64encode
-
-from flask import current_app
+import json
 from api import create_app, db
+from api.models import User
 
 
 class BaseTestCase(unittest.TestCase):
@@ -12,6 +12,16 @@ class BaseTestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        # test user details
+        self.test_username = 'test_user_00'
+        self.test_password = '@test_usr_pwd#'
+        self.test_email = 'user_00@gmail.com'
+        # create default test user
+        self.test_user = User()
+        self.test_user.username = self.test_username
+        self.test_user.password = self.test_password
+        self.test_user.email = self.test_email
+        self.test_user.add(self.test_user)
     
     def tearDown(self):
         db.session.remove()
@@ -23,9 +33,22 @@ class BaseTestCase(unittest.TestCase):
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-
-    def get_authentication_headers(self, username,password):
+  
+    
+class BucketBaseCase(BaseTestCase):
+    def login_default_user(self):
+        login_response = self.test_client.post(
+            '/auth/login',
+            headers=self.get_accept_content_type_headers(),
+            data=json.dumps({
+                'username': self.test_username,
+                'password': self.test_password
+            })
+        )
+        login_resp_data = json.loads(login_response.data.decode())
+        return login_resp_data
+    
+    def get_authentication_content_type_headers(self):
         authentication_headers = self.get_accept_content_type_headers()
-        authentication_headers['Authorization'] = \
-            'Basic ' + b64encode((username + ':' + password).encode('utf- 8')).decode('utf-8')
+        authentication_headers['Authorization'] = self.login_default_user()['auth_token']
         return authentication_headers

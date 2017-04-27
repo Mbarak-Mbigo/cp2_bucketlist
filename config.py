@@ -37,11 +37,12 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Testing environment configurations."""
 
+    DEBUG = True
     TESTING = True
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "postgresql://{DB_USER}: {DB_PASS}@{DB_ADDR}/{DB_NAME}".format(DB_USER="db_admin",
                                                                                              DB_PASS="",
-                                                                                             DB_ADDR="0.0.0.0",
+                                                                                             DB_ADDR="127.0.0.1",
                                                                                              DB_NAME="bucketlist_test")
 
 

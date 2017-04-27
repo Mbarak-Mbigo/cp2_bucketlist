@@ -19,4 +19,3 @@ def verify_user_password(name, password):
 
 class AuthRequiredResource(Resource):
     method_decorators = [auth.login_required]
-

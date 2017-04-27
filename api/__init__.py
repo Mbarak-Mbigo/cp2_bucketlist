@@ -1,3 +1,4 @@
+# api/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -22,4 +23,3 @@ def create_app(config_name):
     app.register_blueprint(api_v1, url_prefix='/api/v1')
 
     return app
-

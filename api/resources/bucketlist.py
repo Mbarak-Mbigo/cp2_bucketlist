@@ -1,5 +1,5 @@
+# api/resources/bucketlist.py
 from flask_restful import Resource
-
 
 
 class BucketList(Resource):
@@ -19,6 +19,7 @@ class BucketList(Resource):
     def delete(self, id):
         # delete a bucketlist
         pass
+    
     
 class BucketItem(Resource):
     # Create a new item in bucket list

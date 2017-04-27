@@ -1,3 +1,4 @@
+# common/utils.py
 from flask import url_for, current_app
 
 
@@ -32,5 +33,3 @@ class Pagination():
             'next': next_page_url,
             'count': paginated_objects.total
         })
-
-        

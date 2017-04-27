@@ -8,7 +8,6 @@ from marshmallow import Schema, fields, pre_load
 from marshmallow import validate
 from flask_marshmallow import Marshmallow
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from flask import current_app
 
 from api import db
@@ -28,6 +27,7 @@ class AddUpdateDelete():
     def delete(self, resource):
         db.session.delete(resource)
         return db.session.commit()
+
 
 class User(db.Model, AddUpdateDelete):
     __tablename__ = 'user'
@@ -59,8 +59,11 @@ class User(db.Model, AddUpdateDelete):
         """
         try:
             payload = {
+                # expiration period
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=600),
+                # time of creation of the token
                 'iat': datetime.datetime.utcnow(),
+                # subject of the token
                 'sub': user_id
             }
             return jwt.encode(
@@ -87,8 +90,6 @@ class User(db.Model, AddUpdateDelete):
             return 'Invalid token.'
     
     
-
-
 class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
@@ -107,6 +108,7 @@ class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(500))
     done = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     date_closed = db.Column(db.DateTime)

@@ -1,18 +1,10 @@
-
+# api/resources/authentication.py
 from flask import Blueprint
 
 from flask_restful import Api, Resource
-from flask_httpauth import HTTPBasicAuth
-from flask import g
-# from models import User, UserSchema
 
 auth_bp = Blueprint('auth_bp', __name__)
 api = Api(auth_bp)
-
-
-def get_auth_token():
-    token = g.user.generate_auth_token()
-    return { 'token': token.decode('ascii') }
 
 
 class Authentication(Resource):

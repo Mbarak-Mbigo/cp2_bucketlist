@@ -5,7 +5,7 @@ api/models.py
 import jwt
 import datetime
 from marshmallow import Schema, fields, pre_load
-from marshmallow import validate
+from marshmallow import validate, validates_schema, ValidationError
 from flask_marshmallow import Marshmallow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
@@ -71,8 +71,8 @@ class User(db.Model, AddUpdateDelete):
                 current_app.config.get('SECRET_KEY'),
                 algorithm='HS256'
             )
-        except Exception as e:
-            return e
+        except Exception as error:
+            return error
     
     @staticmethod
     def decode_auth_token(auth_token):
@@ -123,26 +123,28 @@ class BucketItem(db.Model, AddUpdateDelete):
 # consider adding urls
 class UserSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
-    username = fields.String(required=True, validate=validate.Length(8))
-    password_hash = fields.String()
-    email = fields.String()
+    username = fields.String(validate=(validate.Length(min=1, error='Username Required')))
+    password = fields.String(validate=validate.Length(min=1, error='Password Required'))
+    email = fields.String(validate=(validate.Length(min=1, error='Email Required'),
+                                    validate.Email(error='{input} :Invalid Email address')))
     created_date = fields.DateTime()
     bucketlists = fields.Nested('BucketListSchema', many=True, exclude=('user'))
     
  
 class BucketListSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
-    name = fields.String(required=True)
+    name = fields.String(validate=validate.Length(min=1, error='Bucketlist Name Required'))
     description = fields.String()
     date_created = fields.DateTime()
     date_modified = fields.DateTime()
     user = fields.Nested('UserSchema', only=['id', 'username'])
     items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
+    url = ma.URLFor('api_v1.bucketlist', id='<bucket_id>', _external=True)
     
     
 class BucketItemSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
-    name = fields.String(required=True)
+    name = fields.String(validate=validate.Length(min=1, error='Bucketitem Name Required'))
     description = fields.String()
     done = fields.Boolean(default=False)
     date_created = fields.DateTime()
@@ -150,3 +152,4 @@ class BucketItemSchema(ma.Schema):
     date_modified = fields.DateTime()
     bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'],
                                required=True)
+    url = ma.URLFor('api_v1.bucketlistitem', id='<item_id>', _external=True)

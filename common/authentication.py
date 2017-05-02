@@ -1,7 +1,8 @@
 # common/authentication.py
 
 from flask_httpauth import HTTPBasicAuth
-from flask import Resource, g
+from flask import g
+from flask_restful import Resource
 
 from api.models import User
 
@@ -9,8 +10,8 @@ auth = HTTPBasicAuth()
 
 
 @auth.verify_password
-def verify_user_password(name, password):
-    user = User.query.filter_by(name=name).first()
+def verify_user_password(username, password):
+    user = User.query.filter_by(username=username).first()
     if not user or not user.verify_password(password):
         return False
     g.user = user

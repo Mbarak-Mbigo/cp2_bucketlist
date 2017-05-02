@@ -94,7 +94,6 @@ class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.String(250))
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     date_modified = db.Column(db.DateTime)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
@@ -108,7 +107,6 @@ class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.String(500))
     done = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     date_closed = db.Column(db.DateTime)
@@ -134,7 +132,6 @@ class UserSchema(ma.Schema):
 class BucketListSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
     name = fields.String(validate=validate.Length(min=1, error='Bucketlist Name Required'))
-    description = fields.String()
     date_created = fields.DateTime()
     date_modified = fields.DateTime()
     user = fields.Nested('UserSchema', only=['id', 'username'])
@@ -145,7 +142,6 @@ class BucketListSchema(ma.Schema):
 class BucketItemSchema(ma.Schema):
     id = fields.Integer(dump_only=True)
     name = fields.String(validate=validate.Length(min=1, error='Bucketitem Name Required'))
-    description = fields.String()
     done = fields.Boolean(default=False)
     date_created = fields.DateTime()
     date_closed = fields.DateTime()

@@ -13,4 +13,3 @@ api.add_resource(BucketLists, '/bucketlists/', endpoint='bucket_lists')
 api.add_resource(BucketList, '/bucketlists/<int:id>', endpoint='bucket_list')
 api.add_resource(BucketItems, '/bucketlists/<int:id>/items/', endpoint='bucket_items')
 api.add_resource(BucketItem, '/bucketlists/<int:id>/items/<int:item_id>', endpoint='bucket_item')
-

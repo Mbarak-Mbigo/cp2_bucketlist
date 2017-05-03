@@ -42,7 +42,7 @@ class ResourceBucketLists(AuthRequiredResource):
                 return response, 409
         except SQLAlchemyError as error:
             db.session.rollback()
-            response = jsonify({'error': str(error)})
+            response = {'error': str(error)}
             return response, 401
 
 

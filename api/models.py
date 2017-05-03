@@ -135,6 +135,7 @@ class BucketListSchema(ma.Schema):
     date_modified = fields.DateTime()
     user = fields.Nested('UserSchema', only=['id', 'username'])
     items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
+    url = ma.UrlFor('api_v1.bucket_list', id='<id>', _external=True)
     
     
 class BucketItemSchema(ma.Schema):

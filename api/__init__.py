@@ -17,7 +17,7 @@ def create_app(config_name):
     
     # from api.resources import api
     # api.init_app(app)
-    from api.resources.authentication import auth_bp
+    from api.resources.api_auth_v1 import auth_bp
     from api.resources import api_v1
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(api_v1, url_prefix='/api/v1')

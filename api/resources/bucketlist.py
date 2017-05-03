@@ -3,9 +3,10 @@ from flask import request, jsonify, g, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
-from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
+from api.models import User, BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
 
 buckets_schema = BucketListSchema()
+
 
 class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
@@ -47,10 +48,13 @@ class ResourceBucketLists(AuthRequiredResource):
 
 
 class ResourceBucketList(AuthRequiredResource):
-    def get(self, bucket_id):
+    def get(self, id):
         # return all bucketlists with their items for the user
         # return a specific bucketlist with its items for the user
-        pass
+        bucket = BucketList.query.get_or_404(id)
+        response = buckets_schema.dump(bucket).data
+        print(response)
+        return response
     
     def put(self, bucket_id):
         # edit a bucketlist

@@ -1,11 +1,18 @@
 # api/resources/bucketlist.py
+from flask import request, jsonify, g
+
 from common.authentication import AuthRequiredResource
+from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema
     
 
 class BucketLists(AuthRequiredResource):
     # get all bucketlists for the user
-    def get(self, user_id):
-        pass
+    def get(self):
+        buckets = BucketList.query.filter_by(created_by=g.user.id)
+        data = {
+            'buckets': buckets
+        }
+        return jsonify(data)
     
     # create a bucketlist for the user
     def post(self, user_id):

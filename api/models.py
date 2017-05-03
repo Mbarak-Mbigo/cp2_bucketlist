@@ -60,7 +60,7 @@ class User(db.Model, AddUpdateDelete):
         try:
             payload = {
                 # expiration period
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=600),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=800),
                 # time of creation of the token
                 'iat': datetime.datetime.utcnow(),
                 # subject of the token

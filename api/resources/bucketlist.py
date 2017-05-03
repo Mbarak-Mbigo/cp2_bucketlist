@@ -1,25 +1,52 @@
 # api/resources/bucketlist.py
-from flask import request, jsonify, g
+from flask import request, jsonify, g, make_response
+from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
-from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema
-    
+from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
 
-class BucketLists(AuthRequiredResource):
+buckets_schema = BucketListSchema()
+
+class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
     def get(self):
-        buckets = BucketList.query.filter_by(created_by=g.user.id)
-        data = {
-            'buckets': buckets
-        }
-        return jsonify(data)
+        buckets_query = BucketList.query.filter_by(created_by=g.user.id)
+        buckets = buckets_schema.dump(buckets_query, many=True).data
+        return buckets, 200
     
     # create a bucketlist for the user
-    def post(self, user_id):
-        pass
+    def post(self):
+        request_data = request.get_json()
+        if not request_data:
+            response = {'Bucketlist': 'No input data provided'}
+            return response, 400
+        errors = buckets_schema.validate(request_data)
+        if errors:
+            return errors, 403
+        try:
+            bucket_name = request_data['name']
+            exists = BucketList.query.filter_by(name=bucket_name).first()
+            if not exists:
+                bucketlist = BucketList()
+                bucketlist.name = bucket_name
+                bucketlist.created_by = g.user.id
+                bucketlist.add(bucketlist)
+                
+                response_data = BucketList.query.filter_by(name=bucket_name).first()
+                response = buckets_schema.dump(response_data).data
+                return response, 201
+            else:
+                response = {
+                    'Error': '{} already exists!'.format(bucket_name)
+                }
+                return response, 409
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = jsonify({'error': str(error)})
+            return response, 401
 
 
-class BucketList(AuthRequiredResource):
+class ResourceBucketList(AuthRequiredResource):
     def get(self, bucket_id):
         # return all bucketlists with their items for the user
         # return a specific bucketlist with its items for the user
@@ -34,7 +61,7 @@ class BucketList(AuthRequiredResource):
         pass
     
 
-class BucketItems(AuthRequiredResource):
+class ResourceBucketItems(AuthRequiredResource):
     # create a new item, in bucketlist
     def post(self, bucket_id):
         pass
@@ -44,7 +71,7 @@ class BucketItems(AuthRequiredResource):
         pass
     
       
-class BucketItem(AuthRequiredResource):
+class ResourceBucketItem(AuthRequiredResource):
     # get a single bucket item
     def get(self, item_id):
         pass

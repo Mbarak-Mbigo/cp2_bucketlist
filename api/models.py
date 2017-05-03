@@ -95,7 +95,7 @@ class BucketList(db.Model, AddUpdateDelete):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    date_modified = db.Column(db.DateTime)
+    date_modified = db.Column()
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -126,7 +126,6 @@ class UserSchema(ma.Schema):
     email = fields.String(validate=(validate.Length(min=1, error='Email Required'),
                                     validate.Email(error='{input} :Invalid Email address')))
     created_date = fields.DateTime()
-    bucketlists = fields.Nested('BucketListSchema', many=True, exclude=('user'))
     
  
 class BucketListSchema(ma.Schema):
@@ -136,7 +135,6 @@ class BucketListSchema(ma.Schema):
     date_modified = fields.DateTime()
     user = fields.Nested('UserSchema', only=['id', 'username'])
     items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
-    url = ma.URLFor('api_v1.bucketlist', id='<bucket_id>', _external=True)
     
     
 class BucketItemSchema(ma.Schema):
@@ -148,4 +146,3 @@ class BucketItemSchema(ma.Schema):
     date_modified = fields.DateTime()
     bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'],
                                required=True)
-    url = ma.URLFor('api_v1.bucketlistitem', id='<item_id>', _external=True)

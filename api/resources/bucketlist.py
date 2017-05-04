@@ -79,9 +79,19 @@ class ResourceBucketList(AuthRequiredResource):
             response = jsonify({"error": str(error)})
             return response, 400
         
-    def delete(self, bucket_id):
+    def delete(self, id):
         # delete a bucketlist
-        pass
+        bucket = BucketList.query.get_or_404(id)
+        try:
+            bucket.delete(bucket)
+            response = {
+                'Status': 'Delete operation successful'
+            }
+            return response, 204
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = jsonify({"error": str(error)})
+            return response, 401
     
 
 class ResourceBucketItems(AuthRequiredResource):

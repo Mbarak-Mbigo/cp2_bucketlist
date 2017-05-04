@@ -5,7 +5,7 @@ from flask import request, jsonify, g, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
-from api.models import User, BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
+from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
 
 buckets_schema = BucketListSchema()
 bucketitem_schema = BucketItemSchema()
@@ -15,6 +15,11 @@ class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
     def get(self):
         buckets_query = BucketList.query.filter_by(created_by=g.user.id)
+        if not buckets_query:
+            response = {
+                'Error': 'Resources not found'
+            }
+            return response, 404
         buckets = buckets_schema.dump(buckets_query, many=True).data
         return buckets, 200
     
@@ -54,13 +59,23 @@ class ResourceBucketList(AuthRequiredResource):
     def get(self, id):
         # return all bucketlists with their items for the user
         # return a specific bucketlist with its items for the user
-        bucket = BucketList.query.get_or_404(id)
+        bucket = BucketList.query.get(id)
+        if not bucket:
+            response = {
+                'Error': 'Resource not found'
+            }
+            return response, 404
         response = buckets_schema.dump(bucket).data
         return response, 200
     
     def put(self, id):
         # edit a bucketlist
-        bucket = BucketList.query.get_or_404(id)
+        bucket = BucketList.query.get(id)
+        if not bucket:
+            response = {
+                'Error': 'Resource does not exist'
+            }
+            return response, 404
         bucket_request = request.get_json(force=True)
         if 'name' in bucket_request:
             bucket.name = bucket_request['name']
@@ -81,7 +96,12 @@ class ResourceBucketList(AuthRequiredResource):
         
     def delete(self, id):
         # delete a bucketlist
-        bucket = BucketList.query.get_or_404(id)
+        bucket = BucketList.query.get(id)
+        if not bucket:
+            response = {
+                'Error': 'Resource does not exist!'
+            }
+            return response, 404
         try:
             bucket.delete(bucket)
             response = {
@@ -132,6 +152,11 @@ class ResourceBucketItems(AuthRequiredResource):
     # get all bucket items
     def get(self, id):
         bucket_items_query = BucketItem.query.filter_by(bucket_id=id)
+        if not bucket_items_query:
+            response = {
+                'Error': 'Resource not found'
+            }
+            return  response, 404
         bucketitems = bucketitem_schema.dump(bucket_items_query, many=True).data
         return bucketitems, 200
     
@@ -177,7 +202,12 @@ class ResourceBucketItem(AuthRequiredResource):
     
     def delete(self, id, item_id):
         # Delete a bucketlist item
-        bucket_item = BucketItem.query.get_or_404(item_id)
+        bucket_item = BucketItem.query.get(item_id)
+        if not bucket_item:
+            response = {
+                'Error': 'Resource not found'
+            }
+            return response, 404
         try:
             bucket_item.delete(bucket_item)
             response = {

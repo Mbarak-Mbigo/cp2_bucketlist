@@ -60,7 +60,7 @@ class User(db.Model, AddUpdateDelete):
         try:
             payload = {
                 # expiration period
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=800),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=3600),
                 # time of creation of the token
                 'iat': datetime.datetime.utcnow(),
                 # subject of the token
@@ -107,7 +107,7 @@ class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    done = db.Column(db.Boolean, default=False)
+    done = db.Column(db.Boolean, nullable=False, default='False')
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_closed = db.Column(db.DateTime)
     date_modified = db.Column(db.DateTime)

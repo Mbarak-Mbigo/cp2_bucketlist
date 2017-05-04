@@ -8,6 +8,7 @@ from common.authentication import AuthRequiredResource
 from api.models import User, BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
 
 buckets_schema = BucketListSchema()
+bucketitem_schema = BucketItemSchema()
 
 
 class ResourceBucketLists(AuthRequiredResource):
@@ -55,8 +56,7 @@ class ResourceBucketList(AuthRequiredResource):
         # return a specific bucketlist with its items for the user
         bucket = BucketList.query.get_or_404(id)
         response = buckets_schema.dump(bucket).data
-        print(response)
-        return response
+        return response, 200
     
     def put(self, id):
         # edit a bucketlist
@@ -96,12 +96,14 @@ class ResourceBucketList(AuthRequiredResource):
 
 class ResourceBucketItems(AuthRequiredResource):
     # create a new item, in bucketlist
-    def post(self, bucket_id):
+    def post(self, id):
         pass
     
     # get all bucket items
-    def get(self, bucket_id):
-        pass
+    def get(self, id):
+        bucket_items_query = BucketItem.query.filter_by(bucket_id=id)
+        bucketitems = bucketitem_schema.dump(bucket_items_query, many=True).data
+        return bucketitems, 200
     
       
 class ResourceBucketItem(AuthRequiredResource):

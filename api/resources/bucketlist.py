@@ -138,13 +138,54 @@ class ResourceBucketItems(AuthRequiredResource):
       
 class ResourceBucketItem(AuthRequiredResource):
     # get a single bucket item
-    def get(self, item_id):
-        pass
+    def get(self, id, item_id):
+        bucket = BucketItem.query.get_or_404(item_id)
+        response = bucketitem_schema.dump(bucket).data
+        return response, 200
     
-    def put(self, item_id):
+    def put(self, id, item_id):
         # Update a bucket list item
-        pass
+        bucket_item = BucketItem.query.get_or_404(item_id)
+        bucket_item_request = request.get_json(force=True)
+        if not bucket_item_request:
+            response = {
+                'Error': 'Nothing to update'
+            }
+            return response, 412
+        else:
+            if 'name' in bucket_item_request:
+                bucket_item.name = bucket_item_request['name']
+            if 'done' in bucket_item_request:
+                bucket_item.done = bucket_item_request['done']
+            if 'done' in bucket_item_request and bucket_item_request['done']:
+                bucket_item.date_closed = datetime.datetime.now()
+                
+            bucket_item.date_modified = datetime.datetime.now()
+        dumped_message, dump_errors = bucketitem_schema.dump(bucket_item)
+        if dump_errors:
+            return dump_errors, 400
+        validate_error = bucketitem_schema.validate(dumped_message)
+        if validate_error:
+            print('Am here validate error: {}'.format(validate_error))
+            return validate_error, 400
+        try:
+            bucket_item.update()
+            return self.get(item_id)
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = jsonify({"error": str(error)})
+            return response, 400
     
-    def delete(self, item_id):
+    def delete(self, id, item_id):
         # Delete a bucketlist item
-        pass
+        bucket_item = BucketItem.query.get_or_404(item_id)
+        try:
+            bucket_item.delete(bucket_item)
+            response = {
+                'Status': 'Delete operation successful'
+            }
+            return response, 204
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = jsonify({"error": str(error)})
+            return response, 401

@@ -1,4 +1,6 @@
 # api/resources/bucketlist.py
+import datetime
+
 from flask import request, jsonify, g, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -56,10 +58,27 @@ class ResourceBucketList(AuthRequiredResource):
         print(response)
         return response
     
-    def put(self, bucket_id):
+    def put(self, id):
         # edit a bucketlist
-        pass
-    
+        bucket = BucketList.query.get_or_404(id)
+        bucket_request = request.get_json(force=True)
+        if 'name' in bucket_request:
+            bucket.name = bucket_request['name']
+            bucket.date_modified = datetime.datetime.now()
+        dumped_message, dump_errors = buckets_schema.dump(bucket)
+        if dump_errors:
+            return dump_errors, 400
+        validate_error = buckets_schema.validate(dumped_message)
+        if validate_error:
+            return validate_error, 400
+        try:
+            bucket.update()
+            return self.get(id)
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = jsonify({"error": str(error)})
+            return response, 400
+        
     def delete(self, bucket_id):
         # delete a bucketlist
         pass

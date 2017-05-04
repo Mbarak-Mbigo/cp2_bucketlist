@@ -36,7 +36,7 @@ class User(db.Model, AddUpdateDelete):
     password_hash = db.Column(db.String, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     bucketlists = db.relationship('BucketList', backref='user', lazy=True)
-    created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     
     @property
     def password(self):
@@ -94,8 +94,8 @@ class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    date_modified = db.Column()
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    date_modified = db.Column(db.DateTime, nullable=True)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -108,7 +108,7 @@ class BucketItem(db.Model, AddUpdateDelete):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     done = db.Column(db.Boolean, default=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_closed = db.Column(db.DateTime)
     date_modified = db.Column(db.DateTime)
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)

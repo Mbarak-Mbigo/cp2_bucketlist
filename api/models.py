@@ -109,7 +109,6 @@ class BucketItem(db.Model, AddUpdateDelete):
     name = db.Column(db.String(50), unique=True, nullable=False)
     done = db.Column(db.Boolean, nullable=False, default='False')
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
-    date_closed = db.Column(db.DateTime, nullable=True)
     date_modified = db.Column(db.DateTime, nullable=True)
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)
 
@@ -143,7 +142,6 @@ class BucketItemSchema(ma.Schema):
     name = fields.String(validate=validate.Length(min=1, error='Bucketitem Name Required'))
     done = fields.Boolean(default=False)
     date_created = fields.DateTime()
-    date_closed = fields.DateTime()
     date_modified = fields.DateTime()
     bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'])
     url = ma.UrlFor('api_v1.bucket_item', id='<bucket_id>', item_id='<id>', _external=True)

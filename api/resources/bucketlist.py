@@ -157,8 +157,6 @@ class ResourceBucketItem(AuthRequiredResource):
                 bucket_item.name = bucket_item_request['name']
             if 'done' in bucket_item_request:
                 bucket_item.done = bucket_item_request['done']
-            if 'done' in bucket_item_request and bucket_item_request['done']:
-                bucket_item.date_closed = datetime.datetime.now()
                 
             bucket_item.date_modified = datetime.datetime.now()
         dumped_message, dump_errors = bucketitem_schema.dump(bucket_item)
@@ -169,8 +167,9 @@ class ResourceBucketItem(AuthRequiredResource):
             print('Am here validate error: {}'.format(validate_error))
             return validate_error, 400
         try:
+            print('Updating bucketitem')
             bucket_item.update()
-            return self.get(item_id)
+            return self.get(id, item_id)
         except SQLAlchemyError as error:
             db.session.rollback()
             response = jsonify({"error": str(error)})

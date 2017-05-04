@@ -145,5 +145,4 @@ class BucketItemSchema(ma.Schema):
     date_created = fields.DateTime()
     date_closed = fields.DateTime()
     date_modified = fields.DateTime()
-    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'],
-                               required=True)
+    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'])

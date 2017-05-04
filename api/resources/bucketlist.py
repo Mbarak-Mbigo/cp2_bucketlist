@@ -97,8 +97,38 @@ class ResourceBucketList(AuthRequiredResource):
 class ResourceBucketItems(AuthRequiredResource):
     # create a new item, in bucketlist
     def post(self, id):
-        pass
-    
+        request_data = request.get_json()
+        if not request_data:
+            response = {
+                'Error': 'No input data not provided'
+            }
+            return response, 400
+        errors = bucketitem_schema.validate(request_data)
+        if errors:
+            return errors, 403
+        try:
+            bucket_item_name = request_data['name']
+            exists = BucketItem.query.filter_by(name=bucket_item_name).first()
+            if not exists:
+                bucket_item = BucketItem()
+                bucket_item.name = request_data['name']
+                bucket_item.bucket_id = id
+                bucket_item.add(bucket_item)
+                
+                response_data = BucketItem.query.filter_by(name=bucket_item_name).first()
+                response = bucketitem_schema.dump(response_data).data
+                return response, 201
+            else:
+                response = {
+                    'Error': '{} already exists!'.format(bucket_item_name)
+                }
+                return response, 409
+
+        except SQLAlchemyError as error:
+            db.session.rollback()
+            response = {'error': str(error)}
+            return response, 401
+
     # get all bucket items
     def get(self, id):
         bucket_items_query = BucketItem.query.filter_by(bucket_id=id)

@@ -36,7 +36,7 @@ class User(db.Model, AddUpdateDelete):
     password_hash = db.Column(db.String, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     bucketlists = db.relationship('BucketList', backref='user', lazy=True)
-    created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     
     @property
     def password(self):
@@ -60,7 +60,7 @@ class User(db.Model, AddUpdateDelete):
         try:
             payload = {
                 # expiration period
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=800),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=3600),
                 # time of creation of the token
                 'iat': datetime.datetime.utcnow(),
                 # subject of the token
@@ -94,8 +94,8 @@ class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    date_modified = db.Column()
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    date_modified = db.Column(db.DateTime, nullable=True)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -107,10 +107,9 @@ class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    done = db.Column(db.Boolean, default=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    date_closed = db.Column(db.DateTime)
-    date_modified = db.Column(db.DateTime)
+    done = db.Column(db.Boolean, nullable=False, default='False')
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    date_modified = db.Column(db.DateTime, nullable=True)
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)
 
     def __repr__(self):
@@ -135,6 +134,7 @@ class BucketListSchema(ma.Schema):
     date_modified = fields.DateTime()
     user = fields.Nested('UserSchema', only=['id', 'username'])
     items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
+    url = ma.UrlFor('api_v1.bucket_list', id='<id>', _external=True)
     
     
 class BucketItemSchema(ma.Schema):
@@ -142,7 +142,6 @@ class BucketItemSchema(ma.Schema):
     name = fields.String(validate=validate.Length(min=1, error='Bucketitem Name Required'))
     done = fields.Boolean(default=False)
     date_created = fields.DateTime()
-    date_closed = fields.DateTime()
     date_modified = fields.DateTime()
-    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'],
-                               required=True)
+    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'])
+    url = ma.UrlFor('api_v1.bucket_item', id='<bucket_id>', item_id='<id>', _external=True)

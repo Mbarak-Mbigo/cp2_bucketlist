@@ -103,6 +103,7 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
+        print("Login response: {}".format(login_response.headers))
         login_data = json.loads(login_response.data.decode())
         self.assertEqual(login_response.status_code, 200)
         self.assertTrue(login_data['auth_token'])

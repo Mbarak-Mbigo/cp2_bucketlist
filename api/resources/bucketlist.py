@@ -164,10 +164,8 @@ class ResourceBucketItem(AuthRequiredResource):
             return dump_errors, 400
         validate_error = bucketitem_schema.validate(dumped_message)
         if validate_error:
-            print('Am here validate error: {}'.format(validate_error))
             return validate_error, 400
         try:
-            print('Updating bucketitem')
             bucket_item.update()
             return self.get(id, item_id)
         except SQLAlchemyError as error:

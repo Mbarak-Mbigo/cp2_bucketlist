@@ -123,7 +123,7 @@ class UserSchema(ma.Schema):
     username = fields.String(validate=(validate.Length(min=1, error='Username Required')))
     password = fields.String(validate=validate.Length(min=1, error='Password Required'))
     email = fields.String(validate=(validate.Length(min=1, error='Email Required'),
-                                    validate.Email(error='{input} :Invalid Email address')))
+                                    validate.Email(error='Invalid Email address')))
     created_date = fields.DateTime()
     
  

@@ -50,5 +50,6 @@ class BucketBaseCase(BaseTestCase):
     
     def get_authentication_content_type_headers(self):
         authentication_headers = self.get_accept_content_type_headers()
-        authentication_headers['Authorization'] = self.login_default_user()['auth_token']
+        token = self.login_default_user()['token']
+        authentication_headers['Authorization'] = 'Bearer ' + token
         return authentication_headers

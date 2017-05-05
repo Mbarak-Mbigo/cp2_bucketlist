@@ -15,17 +15,30 @@ bucketitem_schema = BucketItemSchema()
 class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
     def get(self):
+        search_term = request.args.get('q')
+        if search_term:
+            search_results = BucketList.query.filter_by(
+                created_by=g.user.id).filter(
+                BucketList.name.ilike('%' + search_term + '%'))
+            
+            get_data_query = search_results
+        else:
+            get_data_query = BucketList.query
         paginate_content = PaginateData(
-            request,query=BucketList.query,
+            request,
+            query=get_data_query,
             resource_for_url='api_v1.bucket_lists',
             key_name='results',
             schema=buckets_schema
         )
-        response = paginate_content.paginate_query()
-        return response, 200
-        # buckets_query = BucketList.query.filter_by(created_by=g.user.id)
-        # buckets = buckets_schema.dump(buckets_query, many=True).data
-        # return buckets, 200
+        paginated_data = paginate_content.paginate_query()
+        if paginated_data['results']:
+            return paginated_data, 200
+        else:
+            response = {
+                'Results': 'No Resource found'
+            }
+            return response, 404
     
     # create a bucketlist for the user
     def post(self):

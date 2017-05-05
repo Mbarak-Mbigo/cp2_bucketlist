@@ -1,11 +1,12 @@
 # api/resources/bucketlist.py
 import datetime
 
-from flask import request, jsonify, g, make_response
+from flask import request, jsonify, g, make_response, current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
 from api.models import User, BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
+from common.utils import PaginateData
 
 buckets_schema = BucketListSchema()
 bucketitem_schema = BucketItemSchema()
@@ -14,9 +15,17 @@ bucketitem_schema = BucketItemSchema()
 class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
     def get(self):
-        buckets_query = BucketList.query.filter_by(created_by=g.user.id)
-        buckets = buckets_schema.dump(buckets_query, many=True).data
-        return buckets, 200
+        paginate_content = PaginateData(
+            request,query=BucketList.query,
+            resource_for_url='api_v1.bucket_lists',
+            key_name='results',
+            schema=buckets_schema
+        )
+        response = paginate_content.paginate_query()
+        return response, 200
+        # buckets_query = BucketList.query.filter_by(created_by=g.user.id)
+        # buckets = buckets_schema.dump(buckets_query, many=True).data
+        # return buckets, 200
     
     # create a bucketlist for the user
     def post(self):

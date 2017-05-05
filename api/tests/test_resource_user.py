@@ -41,8 +41,9 @@ class TestUserRegistration(BaseTestCase):
             headers=self.get_accept_content_type_headers(),
             data=json.dumps(user_no_username)
         )
-        self.assertEqual(register_response.data,'Username required')
-        self.assertEqual(register_response.status_code, 400)
+        data = json.loads(register_response.data.decode())
+        self.assertEqual(data['username'][0],'Username Required')
+        self.assertEqual(register_response.status_code, 403)
     
     def test_register_user_with_no_password(self):
         register_response = self.test_client.post(
@@ -50,8 +51,9 @@ class TestUserRegistration(BaseTestCase):
             headers=self.get_accept_content_type_headers(),
             data=json.dumps(user_no_password)
         )
-        self.assertEqual(register_response.data, 'Password required')
-        self.assertEqual(register_response.status_code, 400)
+        data = json.loads(register_response.data.decode())
+        self.assertEqual(data['password'][0], 'Password Required')
+        self.assertEqual(register_response.status_code, 403)
         
     def test_register_user_with_no_email(self):
         register_response = self.test_client.post(
@@ -59,16 +61,18 @@ class TestUserRegistration(BaseTestCase):
             headers=self.get_accept_content_type_headers(),
             data=json.dumps(user_no_email)
         )
-        self.assertEqual(register_response.data, 'Email required')
-        self.assertEqual(register_response.status_code, 400)
+        data = json.loads(register_response.data.decode())
+        self.assertEqual(data['email'][0], 'Email Required')
+        self.assertEqual(register_response.status_code, 403)
         
     def test_register_user_with_malformed_email(self):
         register_response = self.test_client.post(
             'auth/register',
             headers=self.get_accept_content_type_headers(),
-            data=json.dumps(user_no_email)
+            data=json.dumps(user_malformed_email)
         )
-        self.assertEqual(register_response.data, 'Invalid email')
+        data = json.loads(register_response.data.decode())
+        self.assertEqual(data['email'][0], 'Invalid Email address')
         self.assertEqual(register_response.status_code, 403)
         
     def test_register_user_with_correct_details(self):
@@ -80,15 +84,19 @@ class TestUserRegistration(BaseTestCase):
         response_data = json.loads(register_response.data.decode())
         self.assertEqual(register_response.status_code, 201)
         # check token available
-        self.assertTrue(response_data['auth_token'])
+        self.assertTrue(response_data['token'])
         
     def test_register_existing_user(self):
         register_response = self.test_client.post(
             'auth/register',
             headers=self.get_accept_content_type_headers(),
-            data=json.dumps(user_correct_credentials)
+            data=json.dumps({
+                'username': self.test_username,
+                'password': self.test_password
+            })
         )
-        self.assertEqual(register_response.data, 'User already exist!')
+        data = json.loads(register_response.data.decode())
+        self.assertEqual(data['Error'], 'User {} already exists!'.format(self.test_username))
         self.assertEqual(register_response.status_code, 409)
 
 
@@ -103,10 +111,9 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
-        print("Login response: {}".format(login_response.headers))
         login_data = json.loads(login_response.data.decode())
         self.assertEqual(login_response.status_code, 200)
-        self.assertTrue(login_data['auth_token'])
+        self.assertTrue(login_data['token'])
         
     def test_login_user_with_no_username(self):
         login_response = self.test_client.post(
@@ -118,8 +125,9 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
-        self.assertEqual(login_response.data, 'Provide username')
-        self.assertEqual(login_response.status_code, 400)
+        data = json.loads(login_response.data.decode())
+        self.assertEqual(data['Error'], 'Invalid username or password')
+        self.assertEqual(login_response.status_code, 401)
         
     def test_login_user_with_no_password(self):
         login_response = self.test_client.post(
@@ -131,8 +139,9 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
-        self.assertEqual(login_response.data, 'Provide password')
-        self.assertEqual(login_response.status_code, 40)
+        data = json.loads(login_response.data.decode())
+        self.assertEqual(data['Error'], 'Invalid username or password')
+        self.assertEqual(login_response.status_code, 401)
         
     def test_login_user_with_incorrect_username(self):
         login_response = self.test_client.post(
@@ -144,7 +153,8 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
-        self.assertEqual(login_response.data, 'Invalid username or password')
+        data = json.loads(login_response.data.decode())
+        self.assertEqual(data['Error'], 'Invalid username or password')
         self.assertEqual(login_response.status_code, 401)
         
     def test_login_user_with_incorrect_password(self):
@@ -157,5 +167,6 @@ class TestUserLogin(BaseTestCase):
             }
             )
         )
-        self.assertEqual(login_response.data, 'Invalid username or password')
+        data = json.loads(login_response.data.decode())
+        self.assertEqual(data['Error'], 'Invalid username or password')
         self.assertEqual(login_response.status_code, 401)

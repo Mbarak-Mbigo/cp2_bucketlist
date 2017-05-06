@@ -3,6 +3,10 @@ from flask import url_for, current_app
 
 
 class PaginateData():
+    """"Pagination class.
+    
+    Paginate query results
+    """
     def __init__(self, request, query, resource_for_url, key_name, schema):
         self.request = request
         self.query = query
@@ -13,16 +17,16 @@ class PaginateData():
         if request.args.get('limit'):
             self.results_per_page = int(request.args.get('limit'))
         else:
-            self.results_per_page = current_app.config['PAGINATION_PAGE_SIZE']
+            self.results_per_page = current_app.config['DEFAULT_PAGINATION_PAGE_SIZE']
 
-        
     def paginate_query(self):
-        # if no page number specified, assume request wants page #1
+        """"Handle query pagination."""
         page_number = self.request.args.get(self.page_argument_name, 1, type=int)
         paginated_objects = self.query.paginate(page_number, per_page=self.results_per_page, error_out=False)
         objects = paginated_objects.items
         if paginated_objects.has_prev:
-            previous_page_url = url_for(self.resource_for_url, limit=self.results_per_page, page=page_number - 1,  _external=True)
+            previous_page_url = url_for(
+                self.resource_for_url, limit=self.results_per_page, page=page_number - 1,  _external=True)
         else:
             previous_page_url = None
         if paginated_objects.has_next:

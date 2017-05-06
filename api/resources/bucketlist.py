@@ -5,7 +5,8 @@ from flask import request, jsonify, g, make_response, current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
-from api.models import User, BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
+from api.models import BucketList, BucketItem, db
+from api.schemas import BucketItemSchema, BucketListSchema
 from common.utils import PaginateData
 
 buckets_schema = BucketListSchema()

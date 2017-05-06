@@ -6,7 +6,8 @@ from flask import g, request, jsonify
 from flask_restful import Resource
 from sqlalchemy.exc import SQLAlchemyError
 
-from api.models import User, UserSchema, db
+from api.models import User, db
+from api.schemas import UserSchema
 
 userschema = UserSchema()
 

@@ -24,7 +24,7 @@ class ResourceBucketLists(AuthRequiredResource):
             
             get_data_query = search_results
         else:
-            get_data_query = BucketList.query
+            get_data_query = BucketList.query.filter_by(created_by=g.user.id)
         paginate_content = PaginateData(
             request,
             query=get_data_query,
@@ -52,14 +52,14 @@ class ResourceBucketLists(AuthRequiredResource):
             return errors, 403
         try:
             bucket_name = request_data['name']
-            exists = BucketList.query.filter_by(name=bucket_name).first()
+            exists = BucketList.query.filter_by(created_by=g.user.id, name=bucket_name).first()
             if not exists:
                 bucketlist = BucketList()
                 bucketlist.name = bucket_name
                 bucketlist.created_by = g.user.id
                 bucketlist.add(bucketlist)
                 
-                response_data = BucketList.query.filter_by(name=bucket_name).first()
+                response_data = BucketList.query.filter_by(created_by=g.user.id, name=bucket_name).first()
                 response = buckets_schema.dump(response_data).data
                 return response, 201
             else:
@@ -131,14 +131,14 @@ class ResourceBucketItems(AuthRequiredResource):
             return errors, 403
         try:
             bucket_item_name = request_data['name']
-            exists = BucketItem.query.filter_by(name=bucket_item_name).first()
+            exists = BucketItem.query.filter_by(bucket_id=id, name=bucket_item_name).first()
             if not exists:
                 bucket_item = BucketItem()
                 bucket_item.name = request_data['name']
                 bucket_item.bucket_id = id
                 bucket_item.add(bucket_item)
                 
-                response_data = BucketItem.query.filter_by(name=bucket_item_name).first()
+                response_data = BucketItem.query.filter_by(bucket_id=id, name=bucket_item_name).first()
                 response = bucketitem_schema.dump(response_data).data
                 return response, 201
             else:

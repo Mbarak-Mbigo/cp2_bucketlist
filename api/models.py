@@ -91,7 +91,7 @@ class User(db.Model, AddUpdateDelete):
 class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_modified = db.Column(db.DateTime, nullable=True)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
@@ -104,7 +104,7 @@ class BucketList(db.Model, AddUpdateDelete):
 class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     done = db.Column(db.Boolean, nullable=False, default='False')
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_modified = db.Column(db.DateTime, nullable=True)

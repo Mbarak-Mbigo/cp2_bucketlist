@@ -2,16 +2,14 @@
 
 api/models.py
 """
-import jwt
 import datetime
-from marshmallow import Schema, fields, pre_load
-from marshmallow import validate, validates_schema, ValidationError
+
+import jwt
 from flask_marshmallow import Marshmallow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 
 from api import db
-
 
 ma = Marshmallow()
 
@@ -93,7 +91,7 @@ class User(db.Model, AddUpdateDelete):
 class BucketList(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_modified = db.Column(db.DateTime, nullable=True)
     items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
@@ -106,7 +104,7 @@ class BucketList(db.Model, AddUpdateDelete):
 class BucketItem(db.Model, AddUpdateDelete):
     __tablename__ = 'bucketitem'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     done = db.Column(db.Boolean, nullable=False, default='False')
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     date_modified = db.Column(db.DateTime, nullable=True)
@@ -114,34 +112,3 @@ class BucketItem(db.Model, AddUpdateDelete):
 
     def __repr__(self):
         return '<BucketItem %r>' % self.name
-    
-    
-# Schemas do validate, serialize and deserialize models
-# consider adding urls
-class UserSchema(ma.Schema):
-    id = fields.Integer(dump_only=True)
-    username = fields.String(validate=(validate.Length(min=1, error='Username Required')))
-    password = fields.String(validate=validate.Length(min=1, error='Password Required'))
-    email = fields.String(validate=(validate.Length(min=1, error='Email Required'),
-                                    validate.Email(error='{input} :Invalid Email address')))
-    created_date = fields.DateTime()
-    
- 
-class BucketListSchema(ma.Schema):
-    id = fields.Integer(dump_only=True)
-    name = fields.String(validate=validate.Length(min=1, error='Bucketlist Name Required'))
-    date_created = fields.DateTime()
-    date_modified = fields.DateTime()
-    user = fields.Nested('UserSchema', only=['id', 'username'])
-    items = fields.Nested('BucketItemSchema', many=True, exclude=('bucketlist',))
-    url = ma.UrlFor('api_v1.bucket_list', id='<id>', _external=True)
-    
-    
-class BucketItemSchema(ma.Schema):
-    id = fields.Integer(dump_only=True)
-    name = fields.String(validate=validate.Length(min=1, error='Bucketitem Name Required'))
-    done = fields.Boolean(default=False)
-    date_created = fields.DateTime()
-    date_modified = fields.DateTime()
-    bucketlist = fields.Nested('BucketListSchema', only=['id', 'name'])
-    url = ma.UrlFor('api_v1.bucket_item', id='<bucket_id>', item_id='<id>', _external=True)

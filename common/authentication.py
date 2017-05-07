@@ -6,7 +6,8 @@ from flask import g, request, jsonify
 from flask_restful import Resource
 from sqlalchemy.exc import SQLAlchemyError
 
-from api.models import User, UserSchema, db
+from api.models import User, db
+from api.schemas import UserSchema
 
 userschema = UserSchema()
 
@@ -32,7 +33,6 @@ def verify_token(token):
     response = {
         'Error': user
     }
-    print(response)
     return False
         
 
@@ -87,7 +87,7 @@ class LoginUser(Resource):
             response = {'user': 'No input data provided'}
             return response, 400
         
-        if 'username' and 'password' not in request_data.keys():
+        if not all(key in request_data for key in ('username', 'password')):
             response = {'Error': 'password and username required'}
             return response, 400
         else:

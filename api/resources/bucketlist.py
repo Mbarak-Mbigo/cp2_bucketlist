@@ -1,11 +1,13 @@
 # api/resources/bucketlist.py
 import datetime
 
-from flask import request, jsonify, g, make_response
+from flask import request, jsonify, g, make_response, current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from common.authentication import AuthRequiredResource
-from api.models import BucketList, BucketItem, BucketItemSchema, BucketListSchema, db
+from api.models import BucketList, BucketItem, db
+from api.schemas import BucketItemSchema, BucketListSchema
+from common.utils import PaginateData
 
 buckets_schema = BucketListSchema()
 bucketitem_schema = BucketItemSchema()
@@ -14,14 +16,30 @@ bucketitem_schema = BucketItemSchema()
 class ResourceBucketLists(AuthRequiredResource):
     # get all bucketlists for the user
     def get(self):
-        buckets_query = BucketList.query.filter_by(created_by=g.user.id)
-        if not buckets_query:
+        search_term = request.args.get('q')
+        if search_term:
+            search_results = BucketList.query.filter_by(
+                created_by=g.user.id).filter(
+                BucketList.name.ilike('%' + search_term + '%'))
+            
+            get_data_query = search_results
+        else:
+            get_data_query = BucketList.query.filter_by(created_by=g.user.id)
+        paginate_content = PaginateData(
+            request,
+            query=get_data_query,
+            resource_for_url='api_v1.bucket_lists',
+            key_name='results',
+            schema=buckets_schema
+        )
+        paginated_data = paginate_content.paginate_query()
+        if paginated_data['results']:
+            return paginated_data, 200
+        else:
             response = {
-                'Error': 'Resources not found'
+                'Results': 'No Resource found'
             }
             return response, 404
-        buckets = buckets_schema.dump(buckets_query, many=True).data
-        return buckets, 200
     
     # create a bucketlist for the user
     def post(self):
@@ -34,14 +52,14 @@ class ResourceBucketLists(AuthRequiredResource):
             return errors, 403
         try:
             bucket_name = request_data['name']
-            exists = BucketList.query.filter_by(name=bucket_name).first()
+            exists = BucketList.query.filter_by(created_by=g.user.id, name=bucket_name).first()
             if not exists:
                 bucketlist = BucketList()
                 bucketlist.name = bucket_name
                 bucketlist.created_by = g.user.id
                 bucketlist.add(bucketlist)
                 
-                response_data = BucketList.query.filter_by(name=bucket_name).first()
+                response_data = BucketList.query.filter_by(created_by=g.user.id, name=bucket_name).first()
                 response = buckets_schema.dump(response_data).data
                 return response, 201
             else:
@@ -128,14 +146,14 @@ class ResourceBucketItems(AuthRequiredResource):
             return errors, 403
         try:
             bucket_item_name = request_data['name']
-            exists = BucketItem.query.filter_by(name=bucket_item_name).first()
+            exists = BucketItem.query.filter_by(bucket_id=id, name=bucket_item_name).first()
             if not exists:
                 bucket_item = BucketItem()
                 bucket_item.name = request_data['name']
                 bucket_item.bucket_id = id
                 bucket_item.add(bucket_item)
                 
-                response_data = BucketItem.query.filter_by(name=bucket_item_name).first()
+                response_data = BucketItem.query.filter_by(bucket_id=id, name=bucket_item_name).first()
                 response = bucketitem_schema.dump(response_data).data
                 return response, 201
             else:
@@ -189,10 +207,8 @@ class ResourceBucketItem(AuthRequiredResource):
             return dump_errors, 400
         validate_error = bucketitem_schema.validate(dumped_message)
         if validate_error:
-            print('Am here validate error: {}'.format(validate_error))
             return validate_error, 400
         try:
-            print('Updating bucketitem')
             bucket_item.update()
             return self.get(id, item_id)
         except SQLAlchemyError as error:

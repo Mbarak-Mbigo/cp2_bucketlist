@@ -182,13 +182,23 @@ class ResourceBucketItems(AuthRequiredResource):
 class ResourceBucketItem(AuthRequiredResource):
     # get a single bucket item
     def get(self, id, item_id):
-        bucket = BucketItem.query.get_or_404(item_id)
+        bucket = BucketItem.query.get(item_id)
+        if not bucket:
+            response = {
+                'Error': 'Resource not found'
+            }
+            return response, 404
         response = bucketitem_schema.dump(bucket).data
         return response, 200
     
     def put(self, id, item_id):
         # Update a bucket list item
-        bucket_item = BucketItem.query.get_or_404(item_id)
+        bucket_item = BucketItem.query.get(item_id)
+        if not bucket_item:
+            response = {
+                'Error': 'Resource not found'
+            }
+            return response, 404
         bucket_item_request = request.get_json(force=True)
         if not bucket_item_request:
             response = {

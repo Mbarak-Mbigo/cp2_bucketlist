@@ -15,7 +15,10 @@ class PaginateData():
         self.schema = schema
         self.page_argument_name = current_app.config['PAGINATION_PAGE_ARGUMENT_NAME']
         if request.args.get('limit'):
-            self.results_per_page = int(request.args.get('limit'))
+            if int(request.args.get('limit')) > 100:
+                self.results_per_page = 100
+            else:
+                self.results_per_page = int(request.args.get('limit'))
         else:
             self.results_per_page = current_app.config['DEFAULT_PAGINATION_PAGE_SIZE']
 

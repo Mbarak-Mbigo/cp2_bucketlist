@@ -9,7 +9,7 @@ new_bucketlist = {
 }
 
 update_bucket_list = {
-    'name': 'My_Bucketlist_1'
+    'name': 'My_Bucketlist_1 '
 }
 
 new_bucket_item = {

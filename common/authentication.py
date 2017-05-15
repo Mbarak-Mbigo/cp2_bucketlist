@@ -67,6 +67,7 @@ class RegisterUser(Resource):
                     "status": "User {} registered Successfully.".format(user.username),
                     "token": auth_token.decode()
                 }
+                print (type(response_data))
                 return response_data, 201
             else:
                 response = {

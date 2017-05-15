@@ -1,11 +1,20 @@
 # api/__init__.py
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from config import config
 
 db = SQLAlchemy()
 
+def add_cors_headers(response, ):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    if request.method == 'OPTIONS':
+        response.headers['Access-Control-Allow-Methods'] = 'DELETE, GET, POST, PUT'
+        headers = request.headers.get('Access-Control-Request-Headers')
+        if headers:
+            response.headers['Access-Control-Allow-Headers'] = headers
+    # print("Response: ", )
+    return response
 
 def create_app(config_name):
     """Application factory function for app instance creation."""

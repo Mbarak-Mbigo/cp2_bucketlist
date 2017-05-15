@@ -8,7 +8,7 @@ install:
 # command to run tests
 before_script:
   - psql -c 'create database bucketlist_test;' -U postgres
-  - psql -c 'createuser -P -s -e db_admin;' -U postgres
+#  - psql -c 'createuser -P -s -e db_admin;' -U postgres
   - "./manage.py db migrate"
   - "./manage.py db upgrade"
 

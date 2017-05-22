@@ -2,7 +2,7 @@
 
 # cp2_bucketlist
 ## Bucket List Application
-Is an API (Application Programming Interface) created using python3, flask and flask restful.
+Is a token based rest API (Application Programming Interface) created using python3, flask and flask restful.
 You can create bucketlists, bucketlist items operate on them through the API endpoints.
 
 ## How to Run this service locally

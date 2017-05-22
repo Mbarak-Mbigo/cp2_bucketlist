@@ -93,8 +93,8 @@ class BucketList(db.Model, AddUpdateDelete):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
-    date_modified = db.Column(db.DateTime, nullable=True)
-    items = db.relationship('BucketItem', backref='bucketlist', lazy=True)
+    date_modified = db.Column(db.DateTime, nullable=True, default=datetime.datetime.now)
+    items = db.relationship('BucketItem', backref='bucketlist', cascade='all, delete', lazy=True)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
@@ -107,7 +107,7 @@ class BucketItem(db.Model, AddUpdateDelete):
     name = db.Column(db.String(50), nullable=False)
     done = db.Column(db.Boolean, nullable=False, default='False')
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
-    date_modified = db.Column(db.DateTime, nullable=True)
+    date_modified = db.Column(db.DateTime, nullable=True, default=datetime.datetime.now)
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'), nullable=False)
 
     def __repr__(self):

@@ -128,8 +128,8 @@ class ResourceBucketList(AuthRequiredResource):
             return response, 204
         except SQLAlchemyError as error:
             db.session.rollback()
-            response = jsonify({"error": str(error)})
-            return response, 401
+            response = {"error": "Error Deleting Object"}
+            return response, 500
     
 
 class ResourceBucketItems(AuthRequiredResource):

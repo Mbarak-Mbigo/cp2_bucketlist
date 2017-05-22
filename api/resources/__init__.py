@@ -2,10 +2,12 @@
 from flask import Blueprint
 from flask_restful import Api
 
+from api import add_cors_headers
 from api.resources.bucketlist import \
     (ResourceBucketList, ResourceBucketLists, ResourceBucketItem, ResourceBucketItems)
 # arguments: blueprint name and a module/package where the blueprint is located
 api_v1 = Blueprint('api_v1', __name__)
+api_v1.after_request(add_cors_headers)
 
 api = Api(api_v1)
 

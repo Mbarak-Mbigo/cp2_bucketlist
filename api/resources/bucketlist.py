@@ -107,9 +107,9 @@ class ResourceBucketList(AuthRequiredResource):
         try:
             bucket.update()
             return self.get(id)
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = jsonify({"error": str(error)})
+            response = {'Error': 'Could not update'}
             return response, 400
         
     def delete(self, id):
@@ -126,7 +126,7 @@ class ResourceBucketList(AuthRequiredResource):
                 'Status': 'Delete operation successful'
             }
             return response, 204
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
             response = {"error": "Error Deleting Object"}
             return response, 500
@@ -162,9 +162,9 @@ class ResourceBucketItems(AuthRequiredResource):
                 }
                 return response, 409
 
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = {'error': str(error)}
+            response = {'error': 'Could not create resource'}
             return response, 401
 
     # get all bucket items

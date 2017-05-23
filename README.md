@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/Mbarak-Mbigo/cp2_bucketlist.svg?branch=develop)](https://travis-ci.org/Mbarak-Mbigo/cp2_bucketlist)
-[![Coverage Status](https://coveralls.io/repos/github/Mbarak-Mbigo/cp2_bucketlist/badge.svg)](https://coveralls.io/github/Mbarak-Mbigo/cp2_bucketlist)
+[![Coverage Status](https://coveralls.io/repos/github/Mbarak-Mbigo/cp2_bucketlist/badge.svg?branch=develop)](https://coveralls.io/github/Mbarak-Mbigo/cp2_bucketlist?branch=develop)
 # cp2_bucketlist
 ## Bucket List Application
 Is a token based rest API (Application Programming Interface) created using python3, flask and flask restful.

@@ -18,7 +18,7 @@ before_script:
   - "./manage.py db upgrade"
 
 script:
-  - "./manage.py test"
+  - "nosetests --with-coverage"
   - "coveralls"
 
 services:

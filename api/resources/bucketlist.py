@@ -36,9 +36,7 @@ class ResourceBucketLists(AuthRequiredResource):
         if paginated_data['results']:
             return paginated_data, 200
         else:
-            response = {
-                'Results': 'No Resource found'
-            }
+            response = {'Results': 'No Resource found'}
             return response, 404
     
     # create a bucketlist for the user
@@ -63,13 +61,11 @@ class ResourceBucketLists(AuthRequiredResource):
                 response = buckets_schema.dump(response_data).data
                 return response, 201
             else:
-                response = {
-                    'Error': '{} already exists!'.format(bucket_name)
-                }
+                response = {'Error': '{} already exists!'.format(bucket_name)}
                 return response, 409
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = {'error': str(error)}
+            response = {'error': 'Resource could not be created'}
             return response, 401
 
 
@@ -79,9 +75,7 @@ class ResourceBucketList(AuthRequiredResource):
         # return a specific bucketlist with its items for the user
         bucket = BucketList.query.get(id)
         if not bucket:
-            response = {
-                'Error': 'Resource not found'
-            }
+            response = {'Error': 'Resource not found'}
             return response, 404
         response = buckets_schema.dump(bucket).data
         return response, 200
@@ -90,9 +84,7 @@ class ResourceBucketList(AuthRequiredResource):
         # edit a bucketlist
         bucket = BucketList.query.get(id)
         if not bucket:
-            response = {
-                'Error': 'Resource does not exist'
-            }
+            response = {'Error': 'Resource does not exist'}
             return response, 404
         bucket_request = request.get_json(force=True)
         if 'name' in bucket_request:
@@ -107,26 +99,22 @@ class ResourceBucketList(AuthRequiredResource):
         try:
             bucket.update()
             return self.get(id)
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = jsonify({"error": str(error)})
+            response = {'Error': 'Could not update'}
             return response, 400
         
     def delete(self, id):
         # delete a bucketlist
         bucket = BucketList.query.get(id)
         if not bucket:
-            response = {
-                'Error': 'Resource does not exist!'
-            }
+            response = {'Error': 'Resource does not exist!'}
             return response, 404
         try:
             bucket.delete(bucket)
-            response = {
-                'Status': 'Delete operation successful'
-            }
+            response = {'Status': 'Delete operation successful'}
             return response, 204
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
             response = {"error": "Error Deleting Object"}
             return response, 500
@@ -137,9 +125,7 @@ class ResourceBucketItems(AuthRequiredResource):
     def post(self, id):
         request_data = request.get_json()
         if not request_data:
-            response = {
-                'Error': 'No input data not provided'
-            }
+            response = {'Error': 'No input data not provided'}
             return response, 400
         errors = bucketitem_schema.validate(request_data)
         if errors:
@@ -157,24 +143,20 @@ class ResourceBucketItems(AuthRequiredResource):
                 response = bucketitem_schema.dump(response_data).data
                 return response, 201
             else:
-                response = {
-                    'Error': '{} already exists!'.format(bucket_item_name)
-                }
+                response = {'Error': '{} already exists!'.format(bucket_item_name)}
                 return response, 409
 
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = {'error': str(error)}
+            response = {'error': 'Could not create resource'}
             return response, 401
 
     # get all bucket items
     def get(self, id):
         bucket_items_query = BucketItem.query.filter_by(bucket_id=id)
-        if not bucket_items_query:
-            response = {
-                'Error': 'Resource not found'
-            }
-            return  response, 404
+        if not bucket_items_query.count():
+            response = {'Error': 'Resource not found'}
+            return response, 404
         bucketitems = bucketitem_schema.dump(bucket_items_query, many=True).data
         return bucketitems, 200
     
@@ -184,9 +166,7 @@ class ResourceBucketItem(AuthRequiredResource):
     def get(self, id, item_id):
         bucket = BucketItem.query.get(item_id)
         if not bucket:
-            response = {
-                'Error': 'Resource not found'
-            }
+            response = {'Error': 'Resource not found'}
             return response, 404
         response = bucketitem_schema.dump(bucket).data
         return response, 200
@@ -195,23 +175,19 @@ class ResourceBucketItem(AuthRequiredResource):
         # Update a bucket list item
         bucket_item = BucketItem.query.get(item_id)
         if not bucket_item:
-            response = {
-                'Error': 'Resource not found'
-            }
+            response = {'Error': 'Resource not found'}
             return response, 404
         bucket_item_request = request.get_json(force=True)
         if not bucket_item_request:
-            response = {
-                'Error': 'Nothing to update'
-            }
+            response = {'Error': 'Nothing to update'}
             return response, 412
         else:
             if 'name' in bucket_item_request:
                 bucket_item.name = bucket_item_request['name']
             if 'done' in bucket_item_request:
                 bucket_item.done = bucket_item_request['done']
-                
             bucket_item.date_modified = datetime.datetime.now()
+            
         dumped_message, dump_errors = bucketitem_schema.dump(bucket_item)
         if dump_errors:
             return dump_errors, 400
@@ -221,26 +197,22 @@ class ResourceBucketItem(AuthRequiredResource):
         try:
             bucket_item.update()
             return self.get(id, item_id)
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = jsonify({"error": str(error)})
+            response = {"error": "Resource could not be updated"}
             return response, 400
     
     def delete(self, id, item_id):
         # Delete a bucketlist item
         bucket_item = BucketItem.query.get(item_id)
         if not bucket_item:
-            response = {
-                'Error': 'Resource not found'
-            }
+            response = {'Error': 'Resource not found'}
             return response, 404
         try:
             bucket_item.delete(bucket_item)
-            response = {
-                'Status': 'Delete operation successful'
-            }
+            response = {'Status': 'Delete operation successful'}
             return response, 204
-        except SQLAlchemyError as error:
+        except SQLAlchemyError:
             db.session.rollback()
-            response = jsonify({"error": str(error)})
+            response = {"error": "Could not delete resource"}
             return response, 401

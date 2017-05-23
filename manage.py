@@ -29,7 +29,10 @@ COV = coverage.coverage(
     branch=True,
     omit=[
         'api/tests/*',
-        '*/virtualenvs/*'
+        '*/virtualenvs/*',
+        'manage.py',
+        'api/models.py',
+        'api/__init__.py'
     ]
 )
 COV.start()

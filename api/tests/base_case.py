@@ -102,6 +102,3 @@ class BucketBaseCase(BaseTestCase):
                 })
             )
         return response
-    
-    def create_bucketlist_items_using_dummy_data(self, data_file):
-        pass

@@ -29,6 +29,21 @@ class TestBucketlist(BucketBaseCase):
             data=json.dumps(new_bucketlist)
         )
         self.assertEqual(response.status_code, 201)
+    def test_create_bucketlist_with_wrong_data_type(self):
+        response = self.test_client.post(
+            '/api/v1/bucketlists/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({'name': 64543})
+        )
+        self.assertEqual(response.status_code, 403)
+    
+    def test_create_bucketlist_with_no_data(self):
+        response = self.test_client.post(
+            '/api/v1/bucketlists/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({})
+        )
+        self.assertEqual(response.status_code, 400)
         
     def test_create_bucketlist_with_invalid_token(self):
         auth_headers = self.get_authentication_content_type_headers()
@@ -39,6 +54,30 @@ class TestBucketlist(BucketBaseCase):
             data=json.dumps(new_bucketlist)
         )
         self.assertTrue(response.status_code==401)
+    
+    def test_delete_bucketlist(self):
+        # create bucketlist
+        response = self.test_client.post(
+            '/api/v1/bucketlists/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming'
+            })
+        )
+        self.assertEqual(response.status_code, 201)
+        
+        # delete created bucket
+        response = self.test_client.delete(
+            '/api/v1/bucketlists/1',
+            headers=self.get_authentication_content_type_headers()
+        )
+        self.assertEqual(response.status_code, 204)
+        # delete a resource that does not exist
+        response = self.test_client.delete(
+            '/api/v1/bucketlists/1',
+            headers=self.get_authentication_content_type_headers()
+        )
+        self.assertEqual(response.status_code, 404)
         
     def test_retrieve_bucketlists(self):
         # Getting bucketlists when none is created
@@ -74,6 +113,7 @@ class TestBucketlist(BucketBaseCase):
             headers=self.get_authentication_content_type_headers()
         )
         self.assertEqual(response.status_code, 404)
+        
     
     def test_updating_a_non_existent_bucketlist(self):
         response = self.test_client.put(
@@ -102,6 +142,101 @@ class TestBucketlist(BucketBaseCase):
             })
         )
         self.assertEqual(response.status_code,200)
+        
+    def test_bucketlist_item(self):
+        # create a bucketlist
+        response = self.test_client.post(
+            '/api/v1/bucketlists/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming'
+            })
+        )
+        self.assertEqual(response.status_code, 201)
+        # get non existent items
+        response = self.test_client.get(
+            '/api/v1/bucketlists/1/items/',
+            headers=self.get_authentication_content_type_headers())
+        self.assertEqual(response.status_code, 404)
+        # get non existent item
+        response = self.test_client.get(
+            '/api/v1/bucketlists/1/items/4',
+            headers=self.get_authentication_content_type_headers())
+        self.assertEqual(response.status_code, 404)
+        # create a new item without data
+        response = self.test_client.post(
+            '/api/v1/bucketlists/1/items/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({})
+        )
+        # create a bucketlist item
+        response = self.test_client.post(
+            '/api/v1/bucketlists/1/items/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'River Swimming'
+            })
+        )
+        self.assertEqual(response.status_code, 201)
+        # create an existing bucketlist item
+        response = self.test_client.post(
+            '/api/v1/bucketlists/1/items/',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'River Swimming'
+            })
+        )
+        self.assertEqual(response.status_code, 409)
+        # get bucketitems
+        response = self.test_client.get(
+            '/api/v1/bucketlists/1/items/',
+            headers=self.get_authentication_content_type_headers())
+        self.assertEqual(response.status_code, 200)
+        # edit a bucket item
+        response = self.test_client.put(
+            '/api/v1/bucketlists/1/items/1',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming pool'
+            })
+        )
+        self.assertEqual(response.status_code, 200)
+        # edit bucketitem with no data
+        response = self.test_client.put(
+            '/api/v1/bucketlists/1/items/1',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({})
+        )
+        self.assertEqual(response.status_code, 412)
+        # edit a non-existent item
+        response = self.test_client.put(
+            '/api/v1/bucketlists/1/items/10',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming pool'
+            })
+        )
+        self.assertEqual(response.status_code, 404)
+        # delete a non existent bucket item
+        response = self.test_client.delete(
+            '/api/v1/bucketlists/1/items/10',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming pool'
+            })
+        )
+        self.assertEqual(response.status_code, 404)
+        # delete an existing item
+        response = self.test_client.delete(
+            '/api/v1/bucketlists/1/items/1',
+            headers=self.get_authentication_content_type_headers(),
+            data=json.dumps({
+                'name': 'Swimming pool'
+            })
+        )
+        self.assertEqual(response.status_code, 204)
+        
+        
 
     def test_results_are_paginated(self):
         # create 31 bucketlists

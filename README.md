@@ -20,7 +20,7 @@ You can use this [guide!](http://python-guide-pt-br.readthedocs.io/en/latest/dev
 ### Run database related commands:
 
 #### create and drop tables
-> ./manage.py create_db
+> ./manage.py create_db  
 > ./manage.py drop_db
 
 #### create migrations directory

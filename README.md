@@ -75,9 +75,20 @@ You can adjust the number of buckets per page by specfying the `limit` query wit
 
 Note: Maximum results per page is **`100`**
 
+#### This project can run under 3 environments:
+* To start the project with a development environment:
+  provide environment variable FLASK_CONFIG='development'
+* For testing use FLASK_CONFIG='testing'
+* For production provide FLASK_CONFIG='production'
 
+##### Development:
+  > In this environment, the developer works on features he/she wants to roll out. Implementation of feedback from the staging/testing   environment is done at this stage.
 
+##### Testing/Staging:
+  > In this environment, the features are tested and feedback is given to the developer(s) to enhance the project's functionality in terms of robustness, Acceptance levels, coverage of edges cases and much more.
 
+##### Production:
+  > In this environment, accepted features are deployed. End users are able to interact on the product and benefit from it.
 
 
 
